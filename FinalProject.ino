@@ -32,7 +32,7 @@ int buttonPin2 = A13;
 bool lastButtonState2 = LOW;
 bool buttonState2 = LOW;
 
-int slideswitchPin = 33;
+int slideswitchPin = 34;
 
 int potPins[8] = { 22, 20, 18, 16, 14, 38, 36 };
 int totalPots = 8;
@@ -67,6 +67,7 @@ void setup() {
 void loop() {
   pitch();
   sequence();
+  sequenceBackward();
   setLeds();
   currentSequence();
   currentSequenceBackward();
@@ -77,18 +78,39 @@ void sequence() {
 
   tempo = analogRead(A14);
 
-  if (millis() > lastStepTime + tempo) {
-    currentStep = currentStep + 1;
+  if (digitalRead(slideswitchPin) == HIGH) {
 
-    if (currentStep > 7) {
-      currentStep = 0;
+    if (millis() > lastStepTime + tempo) {
+      currentStep = currentStep + 1;
+
+      if (currentStep > 7) {
+        currentStep = 0;
+      }
+
+      //      if (stepState[currentStep] == HIGH) {
+      //        usbMIDI.sendNoteOn(mappedPotVals[i], 127, 1);
+      //      }
+
+      lastStepTime = millis();
     }
+  }
+}
 
-    //      if (stepState[currentStep] == HIGH) {
-    //        usbMIDI.sendNoteOn(mappedPotVals[i], 127, 1);
-    //      }
+void sequenceBackward() {
 
-    lastStepTime = millis();
+  tempo = analogRead(A14);
+
+  if (digitalRead(slideswitchPin) == LOW) {
+
+    if (millis() > lastStepTime + tempo) {
+      currentStep = currentStep - 1;
+
+      if (currentStep < 0) {
+        currentStep = 7;
+      }
+
+      lastStepTime = millis();
+    }
   }
 }
 
