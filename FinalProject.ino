@@ -32,9 +32,10 @@ int buttonPin2 = A13;
 bool lastButtonState2 = LOW;
 bool buttonState2 = LOW;
 
-int slideswitchPin = 34;
+int slideswitchPin = 29;
+int slideswitchPin2 = 30;
 
-int potPins[8] = { 22, 20, 18, 16, 14, 38, 36 };
+int potPins[8] = { A8, A6, A4, A2, A0, A22, A19, A17 };
 int totalPots = 8;
 
 int potVals[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -43,10 +44,19 @@ int totalPotVals = 8;
 int mappedPotVals[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int totalMappedPotVals = 8;
 
+int potStepPin = A16;
+int potStepVal = 0;
+int mappedPotStepVal = 0;
+
 int minPitch = 0;
 int maxPitch = 0;
 
-boolean stepState[8] = { HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH };
+boolean stepState[4][8] = {
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
+  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
+};
 
 void setup() {
   AudioMemory(12);
@@ -55,6 +65,7 @@ void setup() {
   waveform1.frequency(262);
 
   pinMode(slideswitchPin, INPUT);
+  pinMode(potStepPin, INPUT);
 
   for (int i = 0; i < totalLeds; i++) {
     pinMode(ledPins[i], OUTPUT);
@@ -65,31 +76,37 @@ void setup() {
 }
 
 void loop() {
-  pitch();
+  pitchBoundaries();
   sequence();
   sequenceBackward();
   setLeds();
   currentSequence();
   currentSequenceBackward();
   currentSequenceLeds();
+
 }
 
 void sequence() {
+  potStepVal = analogRead(potStepPin);
+  mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
   tempo = analogRead(A14);
 
-  if (digitalRead(slideswitchPin) == HIGH) {
+  if (digitalRead(slideswitchPin) == LOW) {
 
     if (millis() > lastStepTime + tempo) {
       currentStep = currentStep + 1;
 
-      if (currentStep > 7) {
+      for (int i = 0; i < totalPots; i++) {
+        potVals[i] = analogRead(potPins[i]);
+        mappedPotVals[i] = map(potVals[i], 0, 1023, 0, 12);
+        waveform1.frequency(minPitch * pow(2, mappedPotVals[i] / 12.0));
+      }
+
+      if (currentStep > mappedPotStepVal) {
         currentStep = 0;
       }
 
-      //      if (stepState[currentStep] == HIGH) {
-      //        usbMIDI.sendNoteOn(mappedPotVals[i], 127, 1);
-      //      }
 
       lastStepTime = millis();
     }
@@ -97,15 +114,17 @@ void sequence() {
 }
 
 void sequenceBackward() {
+  potStepVal = analogRead(potStepPin);
+  mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
   tempo = analogRead(A14);
 
-  if (digitalRead(slideswitchPin) == LOW) {
+  if (digitalRead(slideswitchPin) == HIGH) {
 
     if (millis() > lastStepTime + tempo) {
       currentStep = currentStep - 1;
 
-      if (currentStep < 0) {
+      if (currentStep < mappedPotStepVal) {
         currentStep = 7;
       }
 
@@ -125,6 +144,11 @@ void setLeds() {
     }
   }
 }
+
+void pitch() {
+  
+}
+
 
 void currentSequence() {
   lastButtonState1 = buttonState1;
@@ -152,7 +176,7 @@ void currentSequenceBackward() {
 
 void currentSequenceLeds() {
   for (int i = 0; i < totalSeqLeds; i++) {
-    if (currentChannel == i) {
+    if (currentStep == i) {
       digitalWrite(ledSeqPins[i], HIGH);
     } else {
       digitalWrite(ledSeqPins[i], LOW);
@@ -160,8 +184,8 @@ void currentSequenceLeds() {
   }
 }
 
-void pitch() {
-  if (digitalRead(slideswitchPin) == HIGH) {
+void pitchBoundaries() {
+  if (analogRead(slideswitchPin2) == HIGH) {
     minPitch = 262;
     maxPitch = 523;
   } else {
@@ -172,7 +196,7 @@ void pitch() {
 
 void arpeggiator() {
   for (int i = 0; i < totalPots; i++) {
-    potVals[i] = analogRead(potPins[i]);
+    potVals[i] = digitalRead(potPins[i]);
     mappedPotVals[i] = map(potVals[i], 0, 1023, 0, 12);
     waveform1.frequency(minPitch * pow(2, mappedPotVals[i] / 12.0));
   }
