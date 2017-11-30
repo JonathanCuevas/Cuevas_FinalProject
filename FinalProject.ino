@@ -34,6 +34,7 @@ bool buttonState2 = LOW;
 
 int slideswitchPin = 29;
 int slideswitchPin2 = 30;
+int slideswitchPin3 = 28;
 
 int potPins[8] = { A8, A6, A4, A2, A0, A22, A19, A17 };
 int totalPots = 8;
@@ -51,14 +52,12 @@ int mappedPotStepVal = 0;
 int minPitch = 0;
 int maxPitch = 0;
 
+int sequences[4] = { 1, 2, 3, 4 };
+int totalSequences = 4;
+
+
 boolean on = false;
 
-boolean stepState[4][8] = {
-  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
-  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
-  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
-  {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH },
-};
 
 void setup() {
   AudioMemory(12);
@@ -68,6 +67,7 @@ void setup() {
 
   pinMode(slideswitchPin, INPUT);
   pinMode(slideswitchPin2, INPUT);
+  pinMode(slideswitchPin3, INPUT);
   pinMode(potStepPin, INPUT);
 
   pinMode(buttonPin1, INPUT);
@@ -82,29 +82,36 @@ void setup() {
 }
 
 void loop() {
-
-
-  checkButton();
-
+  if (digitalRead(slideswitchPin3) == HIGH) {
+    checkButton1();
+    digitalWrite(ledSeqPins[2], LOW);
+    digitalWrite(ledSeqPins[3], LOW);
+  } else {
+    checkButton2();
+    digitalWrite(ledSeqPins[0], LOW);
+    digitalWrite(ledSeqPins[1], LOW);
+  }
 }
 
-void checkButton() {
+
+void checkButton1() {
   lastButtonState1 = buttonState1;
   buttonState1 = digitalRead(buttonPin1);
-  
-  if(buttonState1 == HIGH && lastButtonState1 == LOW) {
-    if(on == false) {
+
+  if (buttonState1 == HIGH && lastButtonState1 == LOW) {
+    if (on == false) {
       on = true;
-    } else if(on == true) {
+    } else if (on == true) {
       on = false;
     }
   }
 
-    if(on == true) {
+
+  if (on == true) {
     liveSequence();
     digitalWrite(ledSeqPins[0], HIGH);
     digitalWrite(ledSeqPins[1], LOW);
-  } else if(on == false) {
+  } else if (on == false) {
     on = false;
     setSequence1();
     digitalWrite(ledSeqPins[1], HIGH);
@@ -112,12 +119,32 @@ void checkButton() {
   }
 }
 
+void checkButton2() {
+  lastButtonState2 = buttonState2;
+  buttonState2 = digitalRead(buttonPin2);
+
+  if (buttonState2 == HIGH && lastButtonState2 == LOW) {
+    if (on == false) {
+      on = true;
+    } else if (on == true) {
+      on = false;
+    }
+  }
 
 
-void liveSequence() {
+  if (on == true) {
+    setSequence2();
+    digitalWrite(ledSeqPins[2], HIGH);
+    digitalWrite(ledSeqPins[3], LOW);
+  } else if (on == false) {
+    on = false;
+    setSequence3();
+    digitalWrite(ledSeqPins[3], HIGH);
+    digitalWrite(ledSeqPins[2], LOW);
+  }
+}
 
-
-//void sequence() 
+void sequence() {
   potStepVal = analogRead(potStepPin);
   mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
@@ -138,9 +165,10 @@ void liveSequence() {
       lastStepTime = millis();
     }
   }
+}
 
 
-//void sequenceBackward() 
+void sequenceBackward() {
   potStepVal = analogRead(potStepPin);
   mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
@@ -158,9 +186,10 @@ void liveSequence() {
       lastStepTime = millis();
     }
   }
+}
 
 
-//void setLeds() 
+void setLeds() {
   for (int i = 0; i < totalLeds; i++) {
 
     if (i == currentStep) {
@@ -169,9 +198,15 @@ void liveSequence() {
       digitalWrite(ledPins[i], LOW);
     }
   }
+}
 
 
-//void pitch() 
+void liveSequence() {
+  sequence();
+  sequenceBackward();
+  setLeds();
+
+  //pitch
   for (int i = 0; i < totalPots; i++) {
 
     if (i == currentStep) {
@@ -182,9 +217,9 @@ void liveSequence() {
   }
 
 
-//void pitchBoundaries() 
+  //pitchBoundaries
   if (digitalRead(slideswitchPin2) == HIGH) {
-    minPitch = 262;
+    minPitch = 252;
     maxPitch = 523;
   } else {
     minPitch = 523;
@@ -192,61 +227,14 @@ void liveSequence() {
   }
 }
 
+
+
+
+
 void setSequence1() {
-
-//  void sequence() 
-  potStepVal = analogRead(potStepPin);
-  mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
-
-  tempo = analogRead(A14);
-
-  if (digitalRead(slideswitchPin) == LOW) {
-
-    if (millis() > lastStepTime + tempo) {
-      currentStep = currentStep + 1;
-
-
-
-      if (currentStep > mappedPotStepVal) {
-        currentStep = 0;
-      }
-
-
-      lastStepTime = millis();
-    }
-  }
-
-
-//void sequenceBackward() 
-  potStepVal = analogRead(potStepPin);
-  mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
-
-  tempo = analogRead(A14);
-
-  if (digitalRead(slideswitchPin) == HIGH) {
-
-    if (millis() > lastStepTime + tempo) {
-      currentStep = currentStep - 1;
-
-      if (currentStep < mappedPotStepVal) {
-        currentStep = 7;
-      }
-
-      lastStepTime = millis();
-    }
-  }
-
-
-//void setLeds() 
-  for (int i = 0; i < totalLeds; i++) {
-
-    if (i == currentStep) {
-      digitalWrite(ledPins[i], HIGH);
-    } else {
-      digitalWrite(ledPins[i], LOW);
-    }
-  }
-
+  sequence();
+  sequenceBackward();
+  setLeds();
 
   for (int i = 0; i < totalLeds; i++) {
 
@@ -259,38 +247,136 @@ void setSequence1() {
     if (currentStep == 0) {
       waveform1.frequency(311);
     }
-    
+
     if (currentStep == 1) {
       waveform1.frequency(466);
     }
-    
+
     if (currentStep == 2) {
       waveform1.frequency(622);
     }
-    
+
     if (currentStep == 3) {
       waveform1.frequency(466);
     }
-    
+
     if (currentStep == 4) {
       waveform1.frequency(784);
     }
-    
+
     if (currentStep == 5) {
       waveform1.frequency(466);
     }
-    
+
     if (currentStep == 6) {
       waveform1.frequency(622);
     }
-    
+
     if (currentStep == 7) {
       waveform1.frequency(784);
     }
 
-    
+
   }
 }
 
 
+void setSequence2() {
+  sequence();
+  sequenceBackward();
+  setLeds();
+
+  for (int i = 0; i < totalLeds; i++) {
+
+    if (i == currentStep) {
+      digitalWrite(ledPins[i], HIGH);
+    } else {
+      digitalWrite(ledPins[i], LOW);
+    }
+
+    if (currentStep == 0) {
+      waveform1.frequency(233);
+    }
+
+    if (currentStep == 1) {
+      waveform1.frequency(262);
+    }
+
+    if (currentStep == 2) {
+      waveform1.frequency(294);
+    }
+
+    if (currentStep == 3) {
+      waveform1.frequency(349);
+    }
+
+    if (currentStep == 4) {
+      waveform1.frequency(233);
+    }
+
+    if (currentStep == 5) {
+      waveform1.frequency(262);
+    }
+
+    if (currentStep == 6) {
+      waveform1.frequency(294);
+    }
+
+    if (currentStep == 7) {
+      waveform1.frequency(349);
+    }
+
+
+  }
+}
+
+
+void setSequence3() {
+  sequence();
+  sequenceBackward();
+  setLeds();
+
+  for (int i = 0; i < totalLeds; i++) {
+
+    if (i == currentStep) {
+      digitalWrite(ledPins[i], HIGH);
+    } else {
+      digitalWrite(ledPins[i], LOW);
+    }
+
+    if (currentStep == 0) {
+      waveform1.frequency(262);
+    }
+
+    if (currentStep == 1) {
+      waveform1.frequency(294);
+    }
+
+    if (currentStep == 2) {
+      waveform1.frequency(330);
+    }
+
+    if (currentStep == 3) {
+      waveform1.frequency(392);
+    }
+
+    if (currentStep == 4) {
+      waveform1.frequency(262);
+    }
+
+    if (currentStep == 5) {
+      waveform1.frequency(294);
+    }
+
+    if (currentStep == 6) {
+      waveform1.frequency(330);
+    }
+
+    if (currentStep == 7) {
+      waveform1.frequency(392);
+    }
+
+
+  }
+}
 
