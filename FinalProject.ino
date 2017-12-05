@@ -107,12 +107,11 @@ void checkButton1() {
   }
 
 
-  if (on == true) {
+  if (on == false) {
     liveSequence();
     digitalWrite(ledSeqPins[0], HIGH);
     digitalWrite(ledSeqPins[1], LOW);
-  } else if (on == false) {
-    on = false;
+  } else if (on == true) {
     setSequence1();
     digitalWrite(ledSeqPins[1], HIGH);
     digitalWrite(ledSeqPins[0], LOW);
@@ -132,12 +131,11 @@ void checkButton2() {
   }
 
 
-  if (on == true) {
+  if (on == false) {
     setSequence2();
     digitalWrite(ledSeqPins[2], HIGH);
     digitalWrite(ledSeqPins[3], LOW);
-  } else if (on == false) {
-    on = false;
+  } else if (on == true) {
     setSequence3();
     digitalWrite(ledSeqPins[3], HIGH);
     digitalWrite(ledSeqPins[2], LOW);
@@ -295,35 +293,35 @@ void setSequence2() {
     }
 
     if (currentStep == 0) {
-      waveform1.frequency(233);
+      waveform1.frequency(262);
     }
 
     if (currentStep == 1) {
-      waveform1.frequency(262);
+      waveform1.frequency(330);
     }
 
     if (currentStep == 2) {
-      waveform1.frequency(294);
+      waveform1.frequency(392);
     }
 
     if (currentStep == 3) {
-      waveform1.frequency(349);
+      waveform1.frequency(524);
     }
 
     if (currentStep == 4) {
-      waveform1.frequency(233);
+      waveform1.frequency(660);
     }
 
     if (currentStep == 5) {
-      waveform1.frequency(262);
+      waveform1.frequency(392);
     }
 
     if (currentStep == 6) {
-      waveform1.frequency(294);
+      waveform1.frequency(524);
     }
 
     if (currentStep == 7) {
-      waveform1.frequency(349);
+      waveform1.frequency(660);
     }
 
 
@@ -353,27 +351,27 @@ void setSequence3() {
     }
 
     if (currentStep == 2) {
-      waveform1.frequency(330);
+      waveform1.frequency(440);
     }
 
     if (currentStep == 3) {
-      waveform1.frequency(392);
+      waveform1.frequency(588);
     }
 
     if (currentStep == 4) {
-      waveform1.frequency(262);
+      waveform1.frequency(699);
     }
 
     if (currentStep == 5) {
-      waveform1.frequency(294);
+      waveform1.frequency(440);
     }
 
     if (currentStep == 6) {
-      waveform1.frequency(330);
+      waveform1.frequency(588);
     }
 
     if (currentStep == 7) {
-      waveform1.frequency(392);
+      waveform1.frequency(699);
     }
 
 
