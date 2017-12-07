@@ -82,11 +82,11 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(slideswitchPin3) == HIGH) {
+  if (digitalRead(slideswitchPin3) == HIGH) { // This is responsible for toggling between the live sequence and the first set sequence and their respective LED indicators
     checkButton1();
     digitalWrite(ledSeqPins[2], LOW);
     digitalWrite(ledSeqPins[3], LOW);
-  } else {
+  } else { // This is responsible for toggling between the third and fourth set sequences and their respective LED indicators
     checkButton2();
     digitalWrite(ledSeqPins[0], LOW);
     digitalWrite(ledSeqPins[1], LOW);
@@ -94,7 +94,7 @@ void loop() {
 }
 
 
-void checkButton1() {
+void checkButton1() { // If the switch is high, pressing this button will switch between the live sequence and the first set sequence
   lastButtonState1 = buttonState1;
   buttonState1 = digitalRead(buttonPin1);
 
@@ -118,7 +118,7 @@ void checkButton1() {
   }
 }
 
-void checkButton2() {
+void checkButton2() { // If the switch is low, pressing this button will switch between the third and fourth set sequences
   lastButtonState2 = buttonState2;
   buttonState2 = digitalRead(buttonPin2);
 
@@ -142,7 +142,7 @@ void checkButton2() {
   }
 }
 
-void sequence() {
+void sequence() { // This is the basis of the entire step sequencer when going forward
   potStepVal = analogRead(potStepPin);
   mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
@@ -166,7 +166,7 @@ void sequence() {
 }
 
 
-void sequenceBackward() {
+void sequenceBackward() { // This is the basis of the entire step sequencer when going backward
   potStepVal = analogRead(potStepPin);
   mappedPotStepVal = map(potStepVal, 0, 1023, 0, 7);
 
@@ -187,7 +187,7 @@ void sequenceBackward() {
 }
 
 
-void setLeds() {
+void setLeds() { // This controls the LEDs of the step sequencer
   for (int i = 0; i < totalLeds; i++) {
 
     if (i == currentStep) {
@@ -199,12 +199,12 @@ void setLeds() {
 }
 
 
-void liveSequence() {
+void liveSequence() { // This is the live sequence
   sequence();
   sequenceBackward();
   setLeds();
 
-  //pitch
+  // This controls the quantized pitches of the potentiometers
   for (int i = 0; i < totalPots; i++) {
 
     if (i == currentStep) {
@@ -215,7 +215,7 @@ void liveSequence() {
   }
 
 
-  //pitchBoundaries
+  //This controls the octave of the pitches
   if (digitalRead(slideswitchPin2) == HIGH) {
     minPitch = 252;
     maxPitch = 523;
@@ -229,7 +229,7 @@ void liveSequence() {
 
 
 
-void setSequence1() {
+void setSequence1() { // This is the first set sequence
   sequence();
   sequenceBackward();
   setLeds();
@@ -279,7 +279,7 @@ void setSequence1() {
 }
 
 
-void setSequence2() {
+void setSequence2() { // This is the second set sequence
   sequence();
   sequenceBackward();
   setLeds();
@@ -329,7 +329,7 @@ void setSequence2() {
 }
 
 
-void setSequence3() {
+void setSequence3() { // This is the third set sequence
   sequence();
   sequenceBackward();
   setLeds();
